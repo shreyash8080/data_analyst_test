@@ -1,0 +1,17 @@
+WITH RankedSalaries AS (
+  SELECT
+    ID,
+    Month,
+    Salary,
+    ROW_NUMBER() OVER (PARTITION BY ID ORDER BY Month DESC) AS RowNum
+  FROM EmployeeSalary
+)
+
+SELECT
+  rs.ID,
+  rs.Month,
+  SUM(es.Salary) OVER (PARTITION BY rs.ID ORDER BY rs.Month DESC ROWS BETWEEN 2 PRECEDING AND 1 PRECEDING) AS CumulativeSum
+FROM RankedSalaries rs
+JOIN EmployeeSalary es ON rs.ID = es.ID AND rs.Month = es.Month
+WHERE rs.RowNum > 1
+ORDER BY rs.ID ASC, rs.Month DESC;
